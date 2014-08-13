@@ -18,6 +18,8 @@ object SoldierActor {
 	**/
 	case class UpdateState(newPosition: Position, rangeMatrix: List[Option[ActorRef]], vc: Array[Int])
 
+	case class AttackedWithVC(dmg: Damage, vc: Array[Int])
+
 	//Fancy updates of soldier's features
 	case class DamageUpdate(addDmg: Damage)
 	case class ArmorUpdate(addArmor: Armor)
@@ -38,7 +40,7 @@ object SoldierActor {
 }
 
 class SoldierActor(var soldier: Soldier) extends Actor { 
-	var vectorClock: Array[Int] = Array.ofDim[Int](soldier.range + 1)
+	var myVectorClock: Array[Int] = Array.ofDim[Int](soldier.range + 1)
 	var rangeMatrix: List[Option[ActorRef]] = List.empty
 
 	import SoldierActor._
@@ -51,15 +53,25 @@ class SoldierActor(var soldier: Soldier) extends Actor {
 	}
 
 	def Idle: Receive = {
-		case GotAttacked(dmg)			=> soldier.updateLife(dmg)
-		case BecomeActive 				=> context.unbecome
+		case AttackedWithVC(dmg, vc)	=> 
+			//TODO check if predicate {myVC(worldState) - vc(worldState) > 1} 
+			//before updating soldier state isn't better solution
+			//it checks whether Attacker isn't far behind which could mean that I am not
+			//longer in his range 
+			myVectorClock = updateVectorClock(vc, myVectorClock)
+			soldier.updateLife(dmg)
+		case BecomeActive 				=> 
+			idleTicker = 0
+			context.unbecome
 		case Tick 						=> if(idleTicker == 5) context.unbecome else idleTicker = idleTicker + 1
 	}
 
 	def receive: Receive = {
-		case GotAttacked(dmg)			=> soldier.updateLife(dmg)
+		case AttackedWithVC(dmg, vc)	=> 
+			myVectorClock = updateVectorClock(vc, myVectorClock)
+			soldier.updateLife(dmg)
 		case UpdateState(pos, mx, vc)	=> 
-			vectorClock = updateVectorClock(vc, vectorClock)
+			myVectorClock = updateVectorClock(vc, myVectorClock)
 			rangeMatrix = mx
 			soldier 	= soldier.updatePosition(pos)
 		case _ => 
