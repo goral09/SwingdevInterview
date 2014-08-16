@@ -3,6 +3,7 @@ package com.swingdev.soldiers
 import akka.actor.{Actor, Props, ActorRef, FSM}
 import scala.concurrent.duration._
 import com.swingdev.soldiers.SoldierTypeAliases._
+import com.swingdev.game.VectorClock
 
 object SoldierActor {
 
@@ -16,9 +17,9 @@ object SoldierActor {
 	@rangeMatrix is matrix that contains eventual `ActorRef`s of enemies
 	@vc VectorClock 
 	**/
-	case class UpdateState(newPosition: Position, rangeMatrix: List[Option[ActorRef]], vc: Array[Int])
+	case class UpdateState(newPosition: Position, rangeMatrix: List[Option[ActorRef]], vc: VectorClock)
 
-	case class AttackedWithVC(dmg: Damage, vc: Array[Int])
+	case class AttackedWithVC(dmg: Damage, vc: VectorClock)
 
 	//Fancy updates of soldier's features
 	case class DamageUpdate(addDmg: Damage)
@@ -33,14 +34,13 @@ object SoldierActor {
 	case object Tick
 
 	//Props helper methods
-	def KnightActor: Props = Props(new SoldierActor(Knight.apply()))
-	def ArcherActor: Props = Props(new SoldierActor(Archer.apply()))
-	def HorseRiderActor: Props = Props(new SoldierActor(HorseRider.apply()))
+	def KnightActor(size: Int): Props = Props(new SoldierActor(Knight.apply(), VectorClock(Array.ofDim[Int](size))))
+	def ArcherActor(size: Int): Props = Props(new SoldierActor(Archer.apply(), VectorClock(Array.ofDim[Int](size))))
+	def HorseRiderActor(size: Int): Props = Props(new SoldierActor(HorseRider.apply(), VectorClock(Array.ofDim[Int](size))))
 	// def CreateKnightActor(pos: Position) = Props(new SoldierActor(Knight()))
 }
 
-class SoldierActor(var soldier: Soldier) extends Actor { 
-	var myVectorClock: Array[Int] = Array.ofDim[Int](soldier.range + 1)
+class SoldierActor(var soldier: Soldier, var vectorclock: VectorClock) extends Actor { 
 	var rangeMatrix: List[Option[ActorRef]] = List.empty
 
 	import SoldierActor._
@@ -58,7 +58,7 @@ class SoldierActor(var soldier: Soldier) extends Actor {
 			//before updating soldier state isn't better solution
 			//it checks whether Attacker isn't far behind which could mean that I am not
 			//longer in his range 
-			myVectorClock = updateVectorClock(vc, myVectorClock)
+			vectorclock = vectorclock.updateVC(vc)
 			soldier.updateLife(dmg)
 		case BecomeActive 				=> 
 			idleTicker = 0
@@ -68,10 +68,10 @@ class SoldierActor(var soldier: Soldier) extends Actor {
 
 	def receive: Receive = {
 		case AttackedWithVC(dmg, vc)	=> 
-			myVectorClock = updateVectorClock(vc, myVectorClock)
+			vectorclock = vectorclock.updateVC(vc)
 			soldier.updateLife(dmg)
 		case UpdateState(pos, mx, vc)	=> 
-			myVectorClock = updateVectorClock(vc, myVectorClock)
+			vectorclock = vectorclock.updateVC(vc)
 			rangeMatrix = mx
 			soldier 	= soldier.updatePosition(pos)
 		case _ => 
