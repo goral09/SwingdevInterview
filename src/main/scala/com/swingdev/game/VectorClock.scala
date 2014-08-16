@@ -3,6 +3,8 @@ package com.swingdev.game
 import EventOrdering._
 
 case class VectorClock(var arr: Array[Int]) {
+
+	override def equals(other: Any) = this.arr.sameElements(other.asInstanceOf[VectorClock].arr)
 	/*
 	 Compare @other vectorclock and compare it to @this vector\clock.
 	 Check <i>pos</i> value from vectorclocks and compare them.
@@ -20,6 +22,7 @@ case class VectorClock(var arr: Array[Int]) {
 	*/
 	def updateVC(other: VectorClock): VectorClock = {
 		val arr: Array[Int] = Array.ofDim(other.arr.size)
+		
 		for {
 			i <- Range(0, other.arr.size).toList
 		} arr(i) = math.max(this.arr(i), other.arr(i))
