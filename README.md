@@ -26,6 +26,8 @@ Each type of soldier has its unique abilities. We assume that world where game t
 Actor can make two types of moves:
 
 1. Move
+
+
 	If it wants to move it sends new desired location to **WorldActor**. **World Actor** validates decision. If new place on map is empty it sets soldier's location to it and sends back:
 
 	- Confirmation
@@ -34,6 +36,8 @@ Actor can make two types of moves:
 	- VectorClock
 
 2. Attack
+
+
 	Soldier can attack only after verifying there are enemies in his visibility range. If there are it sends:
 
 	- Attack command

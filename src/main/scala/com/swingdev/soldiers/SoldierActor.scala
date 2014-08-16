@@ -53,17 +53,13 @@ class SoldierActor(var soldier: Soldier, var vectorclock: VectorClock) extends A
 	}
 
 	def Idle: Receive = {
-		case AttackedWithVC(dmg, vc)	=> 
-			//TODO check if predicate {myVC(worldState) - vc(worldState) > 1} 
-			//before updating soldier state isn't better solution
-			//it checks whether Attacker isn't far behind which could mean that I am not
-			//longer in his range 
-			vectorclock = vectorclock.updateVC(vc)
-			soldier.updateLife(dmg)
-		case BecomeActive 				=> 
-			idleTicker = 0
-			context.unbecome
-		case Tick 						=> if(idleTicker == 5) context.unbecome else idleTicker = idleTicker + 1
+	  case AttackedWithVC(dmg, vc)	=> 
+		  vectorclock = vectorclock.updateVC(vc)
+		  soldier.updateLife(dmg)
+	  case BecomeActive 				=> 
+		  idleTicker = 0
+		  context.unbecome
+	  case Tick 						=> if(idleTicker == 5) context.unbecome else idleTicker = idleTicker + 1
 	}
 
 	def receive: Receive = {
@@ -75,14 +71,6 @@ class SoldierActor(var soldier: Soldier, var vectorclock: VectorClock) extends A
 			rangeMatrix = mx
 			soldier 	= soldier.updatePosition(pos)
 		case _ => 
-	}
-
-	// Method that updates internal vector clock by taking maximum for each i-
-	def updateVectorClock(newVC: Array[Int], vectorClock: Array[Int]): Array[Int] =  { 
-		vectorClock(0) = vectorClock(0) + 1; 
-		for {
-			i <- Range(0, vectorClock.size).toArray
-		} yield math.max(newVC(i), vectorClock(i))
 	}
 
 }
