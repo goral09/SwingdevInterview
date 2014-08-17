@@ -7,7 +7,7 @@ import com.swingdev.game.VectorClock
 
 object SoldierActor {
 
-	//Messages
+	//MessagesPosition: Position, rangeMatrix: Seq[ActorRef], vc: VectorClock)
 	case class GotAttacked(dmg: Damage)  // by enemy
 	case class Attack(dmg: Damage) // enemy
 
@@ -17,7 +17,7 @@ object SoldierActor {
 		@rangeMatrix is matrix that contains eventual `ActorRef`s of enemies
 		@vc VectorClock 
 	**/
-	case class UpdateState(newPosition: Position, rangeMatrix: Seq[ActorRef], vc: VectorClock)
+	case class UpdateState(newPosition: Position, enemies: Option[Seq[ActorRef]], vc: Option[VectorClock])
 
 	case class AttackedWithVC(dmg: Damage, vc: VectorClock)
 
@@ -68,8 +68,13 @@ class SoldierActor(var soldier: Soldier) extends Actor with ActorLogging {
 			myVectorclock = myVectorclock.updateVC(vc)
 			soldier.updateLife(dmg)
 		case UpdateState(pos, mx, vc)	=> 
-			myVectorclock = myVectorclock.updateVC(vc)
-			rangeMatrix = mx
+			for {
+				vectorClock <- vc
+				enemies 			<- mx
+			} {
+				myVectorclock = myVectorclock.updateVC(vectorClock)
+				rangeMatrix = enemies
+			}
 			soldier 	= soldier.updatePosition(pos)
 		case _ => 
 	} 
