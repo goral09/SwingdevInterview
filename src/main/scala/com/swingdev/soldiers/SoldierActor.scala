@@ -1,6 +1,6 @@
 package com.swingdev.soldiers
 
-import akka.actor.{Actor, Props, ActorRef, Cancellable, Scheduler}
+import akka.actor.{Actor, Props, ActorRef, Cancellable, Scheduler, ActorLogging}
 import scala.concurrent.duration._
 import com.swingdev.soldiers.SoldierTypeAliases._
 import com.swingdev.game.VectorClock
@@ -17,7 +17,7 @@ object SoldierActor {
 		@rangeMatrix is matrix that contains eventual `ActorRef`s of enemies
 		@vc VectorClock 
 	**/
-	case class UpdateState(newPosition: Position, rangeMatrix: List[Option[ActorRef]], vc: VectorClock)
+	case class UpdateState(newPosition: Position, rangeMatrix: Seq[ActorRef], vc: VectorClock)
 
 	case class AttackedWithVC(dmg: Damage, vc: VectorClock)
 
@@ -39,9 +39,9 @@ object SoldierActor {
 	def HorseRiderActor(): Props = Props(new SoldierActor(HorseRider.apply()))
 }
 
-class SoldierActor(var soldier: Soldier) extends Actor { 
-	var rangeMatrix: List[Option[ActorRef]] = List.empty
-	var myVectorclock: VectorClock = VectorClock(Array.ofDim[Int](soldier.range))
+class SoldierActor(var soldier: Soldier) extends Actor with ActorLogging { 
+	var rangeMatrix: Seq[ActorRef] = Seq.empty
+	var myVectorclock: VectorClock = VectorClock(Array.ofDim[Int](soldier.range+1))
 
 	import SoldierActor._
 
@@ -49,7 +49,7 @@ class SoldierActor(var soldier: Soldier) extends Actor {
 	var idleTickerNumber: Int = 0
 
 	override def preStart() = {
-		context.system.scheduler.schedule(0.seconds, 1.second, self, Tick)
+		context.system.scheduler.schedule(2.seconds, 1.second, self, Tick)
 	}
 
 	def Idle: Receive = {
