@@ -46,20 +46,7 @@ class WorldActor(numberOfSoldiers: Int) extends Actor with ActorLogging with Wor
           worldMap = worldMap.updated(info.pos, Some(ref))
           worldArray(info.pos.x)(info.pos.y) = info.soldierRepresentation
       }
-    /*
-      When Move(newPosition) received WorldActor has to:
-      - check if new position is not occupied
-      - if occupied then return
-        - old position 
-        - sequence of enemies in range 
-        - their VectorClocks
-      - if empty then
-        - move soldier to new position on map
-        - return
-          - new position
-          - sequence of enemies in range
-          - their VectorClocks
-    */
+
 		case Move(info, newPos) => 
       log.info(s"Received Move command")
       val senderRef = sender()

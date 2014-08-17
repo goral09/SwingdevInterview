@@ -56,7 +56,7 @@ class SoldierActor(var soldier: Soldier) extends Actor with ActorLogging {
 	  case AttackedWithVC(dmg, vc)	=> 
 	  	val eventOrdering = myVectorclock.compareVC(vc)
 		  myVectorclock = myVectorclock.updateVC(vc)
-		  soldier.updateLife(dmg)
+		  soldier.updateLife(-1 * dmg)
 	  case Tick 						=> 
 	  	if(idleTickerNumber == 5) {
 	  		context.unbecome 
@@ -66,11 +66,11 @@ class SoldierActor(var soldier: Soldier) extends Actor with ActorLogging {
 	def receive: Receive = {
 		case AttackedWithVC(dmg, vc)	=> 
 			myVectorclock = myVectorclock.updateVC(vc)
-			soldier.updateLife(dmg)
+			soldier.updateLife(-1 * dmg)
 		case UpdateState(pos, mx, vc)	=> 
 			for {
 				vectorClock <- vc
-				enemies 			<- mx
+				enemies 		<- mx
 			} {
 				myVectorclock = myVectorclock.updateVC(vectorClock)
 				rangeMatrix = enemies
