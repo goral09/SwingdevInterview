@@ -11,11 +11,12 @@ case class VectorClock(var arr: Array[Int]) {
 	 If other(pos) < this(pos) then @other happened earlier
 	 If other(pos) == this(pos) then they <b>may</b> happened in parallel
 	*/
-	def compareVC(other: VectorClock, pos: Int): Precedence = (this.arr(pos), other.arr(pos)) match {
-		case (a,b) if a > b 	=> Before
-		case (a,b) if a < b 	=> After
-		case (a,b) if a == b 	=> Parallel
+	def compareVC(other: VectorClock, pos: Int): Precedence = this.arr(pos) - (other.arr(pos) + 1) match {
+		case res if(res > 1) 			=> Before
+		case res if(res < 0) 			=> After
+		case _ 										=> Parallel
 	}
+
 	/*
 	 Update @this vectorclock with values from @other.
 	 Algorithm for updating comes from definiton of Vectorclocks in asynchronous system

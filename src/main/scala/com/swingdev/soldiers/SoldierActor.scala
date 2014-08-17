@@ -34,14 +34,14 @@ object SoldierActor {
 	case object Tick
 
 	//Props helper methods
-	def KnightActor(size: Int): Props = Props(new SoldierActor(Knight.apply(), VectorClock(Array.ofDim[Int](size))))
-	def ArcherActor(size: Int): Props = Props(new SoldierActor(Archer.apply(), VectorClock(Array.ofDim[Int](size))))
-	def HorseRiderActor(size: Int): Props = Props(new SoldierActor(HorseRider.apply(), VectorClock(Array.ofDim[Int](size))))
-	// def CreateKnightActor(pos: Position) = Props(new SoldierActor(Knight()))
+	def KnightActor(): Props = Props(new SoldierActor(Knight.apply()))
+	def ArcherActor(): Props = Props(new SoldierActor(Archer.apply()))
+	def HorseRiderActor(): Props = Props(new SoldierActor(HorseRider.apply()))
 }
 
-class SoldierActor(var soldier: Soldier, var myVectorclock: VectorClock) extends Actor { 
+class SoldierActor(var soldier: Soldier) extends Actor { 
 	var rangeMatrix: List[Option[ActorRef]] = List.empty
+	var myVectorclock: VectorClock = VectorClock(Array.ofDim[Int](soldier.range))
 
 	import SoldierActor._
 
