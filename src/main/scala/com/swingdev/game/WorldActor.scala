@@ -1,10 +1,8 @@
 package com.swingdev.game
 
-import com.swingdev.soldiers.SoldierInfo
-import com.swingdev.soldiers.Soldier
+import com.swingdev.soldiers.{ Soldier, Position, SoldierInfo }
 import akka.actor.{Actor, Props, ActorRef, ActorLogging}
 import scala.concurrent.duration._
-import com.swingdev.soldiers.Position
 
 object WorldActor {
   case class Move(info: SoldierInfo, newPos: Position)
@@ -82,7 +80,7 @@ class WorldActor(numberOfSoldiers: Int) extends Actor with ActorLogging with Wor
         case false =>  
           val oldPos = info.pos
           val enemies: Option[Seq[ActorRef]] = getEnemies(info, worldMap)
-          val vectorClock: Option[VectroClock]  = generateVectorClock()
+          val vectorClock: Option[VectorClock]  = generateVectorClock()
           senderRef ! UpdateState(oldPos, enemies, vectorClock)
       }
 
