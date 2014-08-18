@@ -7,4 +7,6 @@ package com.swingdev.soldiers
 */
 case class SoldierInfo(pos: Position, army: Int, soldierType: Int) {
   lazy val soldierRepresentation: Int = army * 10 + soldierType
+
+  override def toString(): String = s"$pos $army $soldierType"
 }

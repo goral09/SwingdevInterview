@@ -8,6 +8,8 @@ object WorldActor {
   case class Move(info: SoldierInfo, newPos: Position)
   case class IAmDead(pos: Position)
   case class PutSoldier(ref: ActorRef, info: SoldierInfo)
+
+  def props(num: Int): Props = Props(new WorldActor(number))
 }
 
 trait WorldManipulations {
@@ -40,6 +42,7 @@ class WorldActor(numberOfSoldiers: Int) extends Actor with ActorLogging with Wor
 
 	def receive = {
     case PutSoldier(ref: ActorRef, info: SoldierInfo) => 
+      log.debug("Received PutSoldier command ${info}")
       isPosEmpty(info.pos, worldMap) match {
         case false => 
         case true  => 
@@ -75,8 +78,7 @@ class WorldActor(numberOfSoldiers: Int) extends Actor with ActorLogging with Wor
       When soldier reports that it is dead remove it from map and array
     */
     case IAmDead(pos: Position) => 
-      log.info("Received IAmDead command from (${pos.x}, ${pos.y})")
-      val soldier = sender()
+      log.info("Received IAmDead command from $pos")
       worldMap = worldMap - pos
       worldArray(pos.x)(pos.y) = 0
 	}
