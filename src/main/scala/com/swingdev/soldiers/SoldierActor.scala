@@ -65,9 +65,11 @@ class SoldierActor(var soldier: Soldier) extends Actor with ActorLogging {
 
   def receive: Receive = {
     case AttackedWithVC(dmg, vc) =>
+      if(soldier.goIdle) context.become(Idle)
       myVectorclock = myVectorclock.updateVC(vc)
       soldier.updateLife(-1 * dmg)
     case UpdateState(pos, mx, vc) =>
+      if(soldier.goIdle) context.become(Idle)
       for {
         vectorClock <- vc
         enemies <- mx

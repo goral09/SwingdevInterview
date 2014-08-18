@@ -11,6 +11,7 @@ object SoldierTypeAliases {
 
 trait Soldier {
 	import SoldierTypeAliases._
+	import scala.util.Random
 
 	val pos: Position
 	val armNo: Int
@@ -30,6 +31,7 @@ trait Soldier {
 	def updateMovePoints(addMP: MovePoints) = movePoints + addMP
 	def updatePosition(newPosition: Position): Soldier
 
+	def goIdle: Boolean = Random.nextDouble > 0.9
 }
 
 

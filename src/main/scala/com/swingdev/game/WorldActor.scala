@@ -1,7 +1,7 @@
 package com.swingdev.game
 
 import com.swingdev.soldiers.{ Soldier, Position, SoldierInfo }
-import akka.actor.{Actor, Props, ActorRef, ActorLogging}
+import akka.actor.{ Actor, Props, ActorRef, ActorLogging }
 import scala.concurrent.duration._
 
 object WorldActor {
@@ -9,16 +9,21 @@ object WorldActor {
   case class IAmDead(pos: Position)
   case class PutSoldier(ref: ActorRef, info: SoldierInfo)
 
-  def props(num: Int): Props = Props(new WorldActor(number))
+  def props(num: Int): Props = Props(new WorldActor(num))
 }
 
 trait WorldManipulations {
+  
   /*
     For given position and army number returns list of enemies that are in range
   */
-  def getEnemies(info: SoldierInfo,
-    map: Map[Position, Option[ActorRef]]): Option[Seq[ActorRef]] = {
-    None
+  def getEnemies(info: SoldierInfo, map: Map[Position, Option[ActorRef]]): Option[Seq[ActorRef]] = {
+    map.collect {
+      case (pos, Some(ref)) if(pos.x + pos.y <= info.typeToRange) => ref
+    } match {
+      case Nil => None
+      case l : List[ActorRef] => Some(l)
+    }
   }
 
   /*
