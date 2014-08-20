@@ -1,29 +1,35 @@
 package com.swingdev.game
 
-import akka.actor.{Actor, Props, ActorContext, Terminated}
-import com.swingdev.soldiers.{Soldier, SoldierActor}
+import akka.actor.{Actor, Props, ActorContext, Terminated, ActorRef}
+import com.swingdev.soldiers.{Soldier, SoldierActor, Archer, Knight, KnightRider}
+import com.swingdev.game.WorldActor.{PutSoldier}
 
 object ArmySupervisor {
-  def props(archerNo: Int, knightNo: Int, horseRiderNo: Int) = Props(new ArmySupervisor(archerNo, knightNo, horseRiderNo))
+  def props(armyNo: Int, archerNo: Int, knightNo: Int, horseRiderNo: Int, worldActorRef: ActorRef) = 
+    Props(new ArmySupervisor(armyNo, archerNo, knightNo, horseRiderNo, worldActorRef))
 }
 
-class ArmySupervisor(archerNo: Int, knightNo: Int, horseRiderNo: Int) extends Actor {
+class ArmySupervisor(armyNo: Int, archerNo: Int, knightNo: Int, horseRiderNo: Int,
+  worldActorRef: ActorRef) extends Actor {
   var childNo: Int = _
-  private[ArmySupervisor] def createSoldiers(no: Int, soldierProps: => Props)(implicit context: ActorContext): Unit = {
-    for {
-      i <- 1 to no
-    } {
-      val child = context.actorOf(soldierProps)
-      context.watch(child)
-    }
+
+  private[ArmySupervisor] def createSoldiers(number: Int, soldierProps: => Props, sType: Soldier)(implicit context: ActorContext): Unit = {
+      (1 to number).foreach { i => 
+        val childRef = context.actorOf(soldierProps, s"$sType-$i")
+        context.watch(childRef)
+        worldActorRef ! PutSoldier(childRef, armyNo, sType)
+      }
   }
 
   override def preStart() = {
-    createSoldiers(archerNo, SoldierActor.ArcherActor)
-    createSoldiers(knightNo, SoldierActor.KnightActor)
-    createSoldiers(horseRiderNo, SoldierActor.HorseRiderActor)
+    createSoldiers(archerNo, SoldierActor.ArcherActor, Archer)
+    createSoldiers(knightNo, SoldierActor.KnightActor, Knight)
+    createSoldiers(horseRiderNo, SoldierActor.HorseRiderActor, KnightRider)
     childNo = archerNo + knightNo + horseRiderNo
+    registerChildren(worldActorRef)
   }
+
+  
 
   override def receive = {
     case Terminated => 

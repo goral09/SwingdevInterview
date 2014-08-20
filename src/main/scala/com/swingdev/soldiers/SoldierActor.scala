@@ -44,12 +44,12 @@ class SoldierActor(var soldier: Soldier) extends Actor with ActorLogging {
   var myVectorclock: VectorClock = VectorClock(Array.ofDim[Int](soldier.range + 1))
 
   import SoldierActor._
-
   import context.dispatcher
+
   var idleTickerNumber: Int = 0
 
   override def preStart() = {
-    context.system.scheduler.schedule(2.seconds, 1.second, self, Tick)
+    // context.system.scheduler.schedule(2.seconds, 1.second, self, Tick)
   }
 
   def Idle: Receive = {
@@ -65,9 +65,10 @@ class SoldierActor(var soldier: Soldier) extends Actor with ActorLogging {
 
   def receive: Receive = {
     case AttackedWithVC(dmg, vc) =>
+      soldier.updateLife(-1 * dmg)
       if(soldier.goIdle) context.become(Idle)
       myVectorclock = myVectorclock.updateVC(vc)
-      soldier.updateLife(-1 * dmg)
+      
     case UpdateState(pos, mx, vc) =>
       if(soldier.goIdle) context.become(Idle)
       for {

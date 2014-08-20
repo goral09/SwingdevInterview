@@ -5,6 +5,7 @@ import EventOrdering._
 case class VectorClock(var arr: Array[Int]) {
 
 	override def equals(other: Any) = this.arr.sameElements(other.asInstanceOf[VectorClock].arr)
+	
 	/*
 	 Compare @other vectorclock and compare it to @this vector\clock.
 	 Check <i>pos</i> value from vectorclocks and compare them.

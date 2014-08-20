@@ -7,7 +7,7 @@ import scala.concurrent.duration._
 object WorldActor {
   case class Move(info: SoldierInfo, newPos: Position)
   case class IAmDead(pos: Position)
-  case class PutSoldier(ref: ActorRef, info: SoldierInfo)
+  case class PutSoldier(ref: ActorRef, armyNo: Int, sType: Int)
 
   def props(num: Int): Props = Props(new WorldActor(num))
 }
@@ -34,6 +34,12 @@ trait WorldManipulations {
     case None       => true
   }
 
+  def getEmptyPosition(armyNo: Int, world: Array[Array[Int]]): Position = {
+    def hasEmptyField(row: Array[Int]): Boolean = row.find(el => el == 0) match { case Some(_) => true; case None => false}
+    
+
+  }
+
 }
 
 class WorldActor(numberOfSoldiers: Int) extends Actor with ActorLogging with WorldManipulations {
@@ -46,7 +52,8 @@ class WorldActor(numberOfSoldiers: Int) extends Actor with ActorLogging with Wor
   import com.swingdev.soldiers.SoldierActor._
 
 	def receive = {
-    case PutSoldier(ref: ActorRef, info: SoldierInfo) => 
+    case PutSoldier(ref: ActorRef, armyNo: Int, sType: Int) => 
+      val pos: Position = getEmptyPosition(armyNo)
       log.debug("Received PutSoldier command ${info}")
       isPosEmpty(info.pos, worldMap) match {
         case false => 
