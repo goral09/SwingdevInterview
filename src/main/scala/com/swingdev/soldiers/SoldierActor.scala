@@ -8,6 +8,7 @@ import com.swingdev.game.VectorClock
 object SoldierActor {
 
   //MessagesPosition: Position, rangeMatrix: Seq[ActorRef], vc: VectorClock)
+  case class IAmDead(pos: Position)
   case class GotAttacked(dmg: Damage) // by enemy
   case class Attack(dmg: Damage) // enemy
 

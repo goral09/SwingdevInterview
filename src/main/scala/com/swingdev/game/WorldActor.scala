@@ -1,19 +1,22 @@
 package com.swingdev.game
 
 import com.swingdev.soldiers.{ Soldier, Position, SoldierInfo }
+import com.swingdev.soldiers.SoldierActor.{IAmDead, GotAttacked}
 import akka.actor.{ Actor, Props, ActorRef, ActorLogging }
 import scala.concurrent.duration._
 
 object WorldActor {
-  case class Move(info: SoldierInfo, newPos: Position)
-  case class IAmDead(pos: Position)
-  case class PutSoldier(ref: ActorRef, armyNo: Int, sType: Int)
+  sealed trait SoldierActorCommand {
+    val vectorClock: VectorClock
+  }
+  case class Move(info: SoldierInfo, newPos: Position) extends SoldierActorCommand
+  
+  case class PutSoldier(ref: ActorRef, armyNo: Int, sType: Int) extends SoldierActorCommand
 
   def props(num: Int): Props = Props(new WorldActor(num))
 }
 
 trait WorldManipulations {
-  
   /*
     For given position and army number returns list of enemies that are in range
   */

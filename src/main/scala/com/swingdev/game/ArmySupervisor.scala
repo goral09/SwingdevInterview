@@ -9,9 +9,8 @@ object ArmySupervisor {
     Props(new ArmySupervisor(armyNo, archerNo, knightNo, horseRiderNo, worldActorRef))
 }
 
-class ArmySupervisor(armyNo: Int, archerNo: Int, knightNo: Int, horseRiderNo: Int,
-  worldActorRef: ActorRef) extends Actor {
-  var childNo: Int = _
+class ArmySupervisor(armyNo: Int, archerNo: Int, knightNo: Int, horseRiderNo: Int, worldActorRef: ActorRef) extends Actor {
+  var childNo: Int = 0
 
   // TODO need to change this Int-ly typed to something more staticly typed
   private[ArmySupervisor] def createSoldiers(number: Int, soldierProps: => Props, sType: Int)(implicit context: ActorContext): Unit = {
