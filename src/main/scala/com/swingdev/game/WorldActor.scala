@@ -58,13 +58,13 @@ class WorldActor(numberOfSoldiers: Int) extends Actor with ActorLogging with Wor
 
 	def receive = {
     case PutSoldier(ref, armyNo, sType) => 
-      val pos: Position = getEmptyPosition(armyNo, worldArray)
       log.debug("Received PutSoldier command ${info}")
-      isPosEmpty(info.pos, worldMap) match {
-        case false => 
-        case true  => 
-          worldMap = worldMap.updated(info.pos, Some(ref))
-          worldArray(info.pos.x)(info.pos.y) = info.soldierRepresentation
+      val pos: Option[Position] = getEmptyPosition(armyNo, worldArray)
+      for {
+        emptyPosition <- pos
+      } {
+        worldMap = worldMap.updated(emptyPosition, Some(ref))
+        worldArray(emptyPosition.x)(emptyPosition.y) = armyNo * 10 + sType
       }
 
 		case Move(info, newPos) => 
