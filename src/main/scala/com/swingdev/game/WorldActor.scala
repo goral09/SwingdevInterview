@@ -34,10 +34,15 @@ trait WorldManipulations {
     case None       => true
   }
 
-  def getEmptyPosition(armyNo: Int, world: Array[Array[Int]]): Position = {
-    def hasEmptyField(row: Array[Int]): Boolean = row.find(el => el == 0) match { case Some(_) => true; case None => false}
-    
-
+  /*
+    Return first empty position on array that represents world 
+  */
+  def getEmptyPosition(armyNo: Int, world: Array[Array[Int]]): Option[(Position)] = {
+    def hasEmptyField(row: Array[Int]): Boolean = row.contains(0)
+    def indexOfEmptyField(row: Array[Int]): Option[Int] = row.zipWithIndex.collectFirst( { case (v,i) if(v == 0) => i })
+    world.zipWithIndex.collectFirst({case (row, rowIndex) if(hasEmptyField(row)) => indexOfEmptyField(row) match {
+      case p @ Some(x) => Position(rowIndex, x)
+      }})
   }
 
 }
@@ -52,8 +57,8 @@ class WorldActor(numberOfSoldiers: Int) extends Actor with ActorLogging with Wor
   import com.swingdev.soldiers.SoldierActor._
 
 	def receive = {
-    case PutSoldier(ref: ActorRef, armyNo: Int, sType: Int) => 
-      val pos: Position = getEmptyPosition(armyNo)
+    case PutSoldier(ref, armyNo, sType) => 
+      val pos: Position = getEmptyPosition(armyNo, worldArray)
       log.debug("Received PutSoldier command ${info}")
       isPosEmpty(info.pos, worldMap) match {
         case false => 
@@ -89,7 +94,7 @@ class WorldActor(numberOfSoldiers: Int) extends Actor with ActorLogging with Wor
     /*
       When soldier reports that it is dead remove it from map and array
     */
-    case IAmDead(pos: Position) => 
+    case IAmDead(pos) => 
       log.info("Received IAmDead command from $pos")
       worldMap = worldMap - pos
       worldArray(pos.x)(pos.y) = 0

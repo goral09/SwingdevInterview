@@ -13,20 +13,19 @@ class ArmySupervisor(armyNo: Int, archerNo: Int, knightNo: Int, horseRiderNo: In
   worldActorRef: ActorRef) extends Actor {
   var childNo: Int = _
 
-  private[ArmySupervisor] def createSoldiers(number: Int, soldierProps: => Props, sType: Soldier)(implicit context: ActorContext): Unit = {
+  private[ArmySupervisor] def createSoldiers(number: Int, soldierProps: => Props, sType: Int)(implicit context: ActorContext): Unit = {
       (1 to number).foreach { i => 
-        val childRef = context.actorOf(soldierProps, s"$sType-$i")
+        val childRef = context.actorOf(soldierProps)
         context.watch(childRef)
         worldActorRef ! PutSoldier(childRef, armyNo, sType)
       }
   }
 
   override def preStart() = {
-    createSoldiers(archerNo, SoldierActor.ArcherActor, Archer)
-    createSoldiers(knightNo, SoldierActor.KnightActor, Knight)
-    createSoldiers(horseRiderNo, SoldierActor.HorseRiderActor, KnightRider)
+    createSoldiers(archerNo, SoldierActor.ArcherActor, 1)
+    createSoldiers(knightNo, SoldierActor.KnightActor, 2)
+    createSoldiers(horseRiderNo, SoldierActor.HorseRiderActor, 3)
     childNo = archerNo + knightNo + horseRiderNo
-    registerChildren(worldActorRef)
   }
 
   

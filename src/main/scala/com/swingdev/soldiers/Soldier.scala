@@ -32,6 +32,7 @@ trait Soldier {
 	def updatePosition(newPosition: Position): Soldier
 
 	def goIdle: Boolean = Random.nextDouble > 0.9
+
 }
 
 
